@@ -1,0 +1,628 @@
+basePath: /
+definitions:
+  models.Ingredient:
+    description: Modelo para gerenciamento de ingredientes.
+    properties:
+      id:
+        description: ID é o identificador único do ingrediente.
+        type: integer
+      name:
+        description: Name é o nome do ingrediente.
+        example: Farinha de trigo.
+        type: string
+    type: object
+  models.IngredientsRecipes:
+    description: Modelo para relacionar um ingrediente da tabela ingredients a uma
+      receita.
+    properties:
+      ingredient:
+        allOf:
+        - $ref: '#/definitions/models.Ingredient'
+        description: Ingredient é o objeto do ingrediente adicionado.
+      ingredient_id:
+        description: IngredientID é o ID do ingrediente adicionado.
+        type: integer
+      quantity:
+        description: Quantity é a quantidade do ingrediente adicionado.
+        example: 200g
+        type: string
+      recipeID:
+        description: RecipeID é o ID da receita à qual o ingrediente foi adicionado.
+        type: integer
+    type: object
+  models.Recipe:
+    description: Modelo para gerenciamento de receitas.
+    properties:
+      id:
+        description: ID é o identificador único da receita.
+        type: integer
+      ingredients:
+        description: IngredientsRecipes representa o conjunto de ingredientes que
+          pertence à receita.
+        items:
+          $ref: '#/definitions/models.IngredientsRecipes'
+        type: array
+      instructions:
+        description: Instructions representa as instruções sobre o modo de preparo
+          da receita.
+        example: Em uma tigela adicione a farinha, o açucar e o cacau em pó.
+        type: string
+      name:
+        description: Name é o nome da sua receita.
+        example: bolo de chocolate
+        type: string
+      user_id:
+        description: UserID é o identificador do usuário que criou a receita.
+        type: integer
+    type: object
+  models.User:
+    description: Modelo para gerenciar os usuários do sistema.
+    properties:
+      email:
+        description: Email é o email único do usuário.
+        example: seuemail@gmail.com
+        type: string
+      id:
+        description: ID é o código de identificação único do usuário.
+        type: integer
+      password:
+        description: Password é a senha de entrada do usuário no sistema.
+        type: string
+      username:
+        description: Username é o nome único do usuário no sistema.
+        example: seunome
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: sslindner@furb.br
+    name: Sofia Sousa Lindner
+  description: Crie suas próprias receitas e faça um incrível livro de receitas!
+  license:
+    name: MIT
+    url: https://github.com/Marlon-Sbardelatti/go-rest-api/blob/master/LICENSE
+  title: Cookbook API
+  version: "1.0"
+paths:
+  /ingredient:
+    get:
+      description: Buscar todos os ingredientes cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Ingredient'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar todos os ingredientes
+      tags:
+      - ingredient
+    post:
+      consumes:
+      - application/json
+      description: Criar novo ingrediente
+      parameters:
+      - description: Novo ingrediente
+        in: body
+        name: ingredient
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ingredient'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Ingredient created!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+      security:
+      - Token: []
+      summary: Criar novo ingrediente
+      tags:
+      - ingredient
+  /ingredient/{id}:
+    delete:
+      description: Deletar ingrediente pelo ID
+      parameters:
+      - description: ID do ingrediente
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Ingredient deleted!
+          schema:
+            type: string
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Deletar ingrediente
+      tags:
+      - ingredient
+    get:
+      description: Buscar ingrediente pelo ID
+      parameters:
+      - description: ID do ingrediente
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Ingredient'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar ingrediente pelo ID
+      tags:
+      - ingredient
+    put:
+      consumes:
+      - application/json
+      description: Atualizar ingrediente pelo ID
+      parameters:
+      - description: ID do ingrediente
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Ingrediente atualizado
+        in: body
+        name: ingredient
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ingredient'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Ingredient updated!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Atualizar ingrediente
+      tags:
+      - ingredient
+  /ingredient/name/{name}:
+    get:
+      description: Buscar ingrediente pelo nome sem case sensitive e convertendo '-'
+        para espaços
+      parameters:
+      - description: Nome do ingrediente
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Ingredient'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar ingrediente pelo nome
+      tags:
+      - ingredient
+  /recipe:
+    post:
+      consumes:
+      - application/json
+      description: Criar nova receita
+      parameters:
+      - description: Nova receita
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/models.Recipe'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Recipe created!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+      security:
+      - Token: []
+      summary: Criar nova receita
+      tags:
+      - recipe
+  /recipe/:
+    get:
+      description: Buscar todas as receitas cadastradas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Recipe'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar todas as receitas
+      tags:
+      - recipe
+  /recipe/{id}:
+    delete:
+      description: Deletar receita pelo ID
+      parameters:
+      - description: ID da receita
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Recipe deleted!
+          schema:
+            type: string
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Deletar receita
+      tags:
+      - recipe
+    get:
+      description: Buscar receita pelo ID
+      parameters:
+      - description: ID da receita
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Recipe'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar receita pelo ID
+      tags:
+      - recipe
+    put:
+      consumes:
+      - application/json
+      description: Atualizar receita pelo ID
+      parameters:
+      - description: ID da receita
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Receita atualizada
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/models.Recipe'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Recipe updated!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Atualizar receita
+      tags:
+      - recipe
+  /recipe/{id}/ingredients:
+    post:
+      consumes:
+      - application/json
+      description: Adicionar ingrediente cadastrado à uma receita criada, passando
+        ambos IDs
+      parameters:
+      - description: ID da receita
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Ingrediente adicionado
+        in: body
+        name: reqIngredientRecipe
+        required: true
+        schema:
+          $ref: '#/definitions/models.IngredientsRecipes'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Ingredient added!
+          schema:
+            type: string
+        "400":
+          description: Error adding ingredient to recipe
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Adicionar ingrediente à receita
+      tags:
+      - ingredients_recipes
+  /recipe/{id}/ingredients/{ingredient_id}:
+    delete:
+      description: Remover ingrediente cadastrado em uma receita, passando ambos IDs
+      parameters:
+      - description: ID da receita
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID do ingrediente
+        in: path
+        name: ingredient_id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Ingredient removed from recipe!
+          schema:
+            type: string
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Remover ingrediente da receita
+      tags:
+      - ingredients_recipes
+  /recipe/name/{name}:
+    get:
+      description: Buscar receita pelo nome sem case sensitive e convertendo '-' para
+        espaços
+      parameters:
+      - description: Nome da receita
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Recipe'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Buscar receita pelo nome
+      tags:
+      - recipe
+  /user:
+    get:
+      description: Buscar todos os usuários cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Buscar todos os usuários
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Criar novo usuário
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: User created!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+      summary: Criar novo usuário
+      tags:
+      - user
+  /user/{id}:
+    delete:
+      description: Deletar usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: User deleted!
+          schema:
+            type: string
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Deletar usuário
+      tags:
+      - user
+    get:
+      description: Buscar usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Buscar usuário pelo ID
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Atualizar usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: User updated!
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Atualizar usuário
+      tags:
+      - user
+  /user/{id}/recipes:
+    get:
+      description: Buscar receitas criadas pelo usuário
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Recipe'
+            type: array
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Token: []
+      summary: Buscar receitas criadas pelo usuário
+      tags:
+      - user
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica o usuário e retorna um token JWT de acesso
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid JSON
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Realizar login do usuário
+      tags:
+      - user
+securityDefinitions:
+  Token:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
